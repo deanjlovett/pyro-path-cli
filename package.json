@@ -1,0 +1,16 @@
+{
+  "name": "006-pyro-path",
+  "version": "0.0.1",
+  "description": "adding path in pyramid",
+  "main": "pyro-path.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dean Lovett",
+  "license": "MIT",
+  "dependencies": {
+    "command-line-args": "^5.1.1",
+    "command-line-usage": "^6.1.0",
+    "n-readlines": "^1.0.0"
+  }
+}
