@@ -22,8 +22,10 @@ if( options['input'] ){
   fileName = options['input'];
 }
 
-function Node(value,left,right){
+function Node(value,left,right,path,prod){
   this.value=value;
+  this.path=path;
+  this.prod=prod;
   this.left=left;
   this.right=right;
 }
@@ -40,7 +42,20 @@ fs.readFile(
       myData = myData.filter(e=>e.length>0);
       myData = myData.map(e=>e.split(',').map(f=>parseInt(f,10)));
       let lowerNodes=[];
-      let row = myData.pop();
+      let rootData = myData.shift(); 
+
+      while( myData.length > 0) {
+        row = myData.shift();
+
+        for( let j=0;j<row.length;++j){
+          let node = new Node(row[j],lowerNodes[j],lowerNodes[j+1]);
+          upperNodes.push(node);
+        }
+        lowerNodes=upperNodes;
+      }
+
+
+      let row = myData();
       for( let i=0;i<row.length;++i){
         lowerNodes.push(new Node(row[i],null,null));
       }
