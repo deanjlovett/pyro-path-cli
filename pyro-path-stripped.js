@@ -41,15 +41,18 @@ fs.readFile(
       let target = parseInt(myData.shift().split(' ').pop());
       myData = myData.filter(e=>e.length>0);
       myData = myData.map(e=>e.split(',').map(f=>parseInt(f,10)));
+      let value = mydata.shift();
+      let node = new Node(value,null,null,'',value);
+      let root = node;
       let lowerNodes=[];
-      let rootData = myData.shift(); 
-
+      let upperNodes=[];
+      upperNodes.push(root);
       while( myData.length > 0) {
         row = myData.shift();
-
-        for( let j=0;j<row.length;++j){
-          let node = new Node(row[j],lowerNodes[j],lowerNodes[j+1]);
-          upperNodes.push(node);
+        for( let j=0;j<upperNodes.length;++j){
+          let value = row[i];
+          let node = new Node(value,null,null,'',value);
+          lowerNodes.push(node);
         }
         lowerNodes=upperNodes;
       }
