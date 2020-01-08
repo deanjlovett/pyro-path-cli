@@ -22,10 +22,8 @@ if( options['input'] ){
   fileName = options['input'];
 }
 
-function Node(value,left,right,path,prod){
+function Node(value,left,right){
   this.value=value;
-  this.path=path;
-  this.prod=prod;
   this.left=left;
   this.right=right;
 }
@@ -40,28 +38,18 @@ fs.readFile(
       let myData = data.split('\n').map(e=>e.replace('\n','').replace('\r',''));
       let target = parseInt(myData.shift().split(' ').pop());
       myData = myData.filter(e=>e.length>0);
+
+      // split the string into integers
       myData = myData.map(e=>e.split(',').map(f=>parseInt(f,10)));
-      let value = mydata.shift();
-      let node = new Node(value,null,null,'',value);
-      let root = node;
+
+      // work from the bottom up of the pyramid
+      // fill in row of nodes with empty left, right children
       let lowerNodes=[];
-      let upperNodes=[];
-      upperNodes.push(root);
-      while( myData.length > 0) {
-        row = myData.shift();
-        for( let j=0;j<upperNodes.length;++j){
-          let value = row[i];
-          let node = new Node(value,null,null,'',value);
-          lowerNodes.push(node);
-        }
-        lowerNodes=upperNodes;
-      }
-
-
-      let row = myData();
+      let row = myData.pop();
       for( let i=0;i<row.length;++i){
         lowerNodes.push(new Node(row[i],null,null));
       }
+      // next loop through the array of arrays, from the bottom
       while( myData.length > 0) {
         row = myData.pop();
         let upperNodes=[];
@@ -71,7 +59,14 @@ fs.readFile(
         }
         lowerNodes=upperNodes;
       }
+      // the lowerNodes array should have only one element
+      // added assert for testing, commented out submission 
+      // assert(lowerNodes.length === 1,'lowerNodes should have one and only one element.')
+
+      // evaluate the node tree, to get a list of paths and values
       let ret = evalNode(lowerNodes.pop(),'',1,'');
+
+      // filter array to only include paths that add up to target value
       ret = ret.filter(e=>e.prod===target);
       if( ret.length < 1 ) {
         console.log(`No paths through the pyramid add up to ${target}.`);
@@ -98,5 +93,4 @@ function evalNode( nd, path, prod ){
   }
   return ret;
 }
-
 

@@ -1,0 +1,169 @@
+<div class="header"></div>
+body {
+    top: 0;
+    right: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    background-color: #fff4e4;
+    font-family: Arial, Helvetica, sans-serif
+}
+
+.horizontal {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 60vw;
+    margin: auto
+}
+
+.center-label,
+.header {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%
+}
+
+.header {
+    height: 5vh;
+    top: 0;
+    background-color: #3d0e1e
+}
+
+h6 {
+    margin: 0;
+    font-size: 1rem;
+    color: #f88020
+}
+
+h1 {
+    color: #3d0e1e;
+    text-align: center
+}
+
+button {
+    margin-bottom: 1vh;
+    height: 100px;
+    border: none;
+    color: #f88020;
+    background-color: #3d0e1e;
+    font-size: 2rem;
+    width: 100%
+}
+
+@media (max-width:768px) {
+    button {
+        font-size: 1rem
+    }
+}
+
+button:hover {
+    cursor: pointer;
+    border: 4px solid #3d0e1e;
+    color: #d1247b
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%
+}
+
+textarea {
+    background-color: #fff4e4;
+    border: 2px solid #3d0e1e;
+    height: 20vh;
+    font-size: 1rem
+}
+
+.options {
+    margin: 0 0 4vh
+}
+
+form>input {
+    height: 100px;
+    border: none;
+    color: #f88020;
+    background-color: #3d0e1e;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 1vh
+}
+
+@media (max-width:768px) {
+    form>input {
+        font-size: 1rem
+    }
+}
+
+form>input:hover {
+    cursor: pointer;
+    border: 4px solid #3d0e1e;
+    color: #d1247b
+}
+
+select {
+    width: 50%;
+    height: 10vh;
+    border: none;
+    color: #f88020;
+    background-color: #3d0e1e;
+    font-size: 1.3rem;
+    margin: 2vh 0
+}
+
+h5 {
+    color: #3d0e1e;
+    font-size: 1rem;
+    margin: 1vh 0
+}
+
+.path,
+h5 {
+    text-align: center
+}
+
+.path {
+    margin: 0 0 1vh;
+    color: #d1247b;
+    font-size: 2rem
+}
+
+ul {
+    list-style: none;
+    padding: 0
+}
+
+.default {
+    text-align: center;
+    color: #3d0e1e;
+    font-size: 1rem
+}
+
+.footer {
+    width: 100%;
+    height: 15vh;
+    bottom: 0;
+    background-color: #3d0e1e;
+    display: flex;
+    flex-direction: column;
+    justify-content: center
+}
+
+.no-path-message {
+    color: #f88020
+}
+
+.link {
+    color: #d1247b;
+    text-decoration: none;
+    font-size: 2rem
+}
+
+.link:hover {
+    cursor: pointer
+}
+
+/*# sourceMappingURL=/js.f467ac14.css.map */
