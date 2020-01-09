@@ -57,7 +57,6 @@ Target: 720
 */
 
 let sampleInputFileContent = 'Target: 720\n2\n4,3\n3,2,6\n2,9,5,2\n10,5,2,15,5';
-//let contentNote = 'If no input file name is given,\nthen file name: '+ defaultFileName + ' will be used.';
 let contentNote = `If no input file name is given,\nthen input file: ${defaultFileName}`;
 if( options['help']){
   const usage = commandLineUsage([
@@ -76,34 +75,33 @@ if( options['debug']) {
 }
 
 if(debug){
-  console.log('');
-  console.log('*** debug ***');
-  console.log('******************************');
-  console.log('*** now with debug outout ****');
-  console.log('******************************');
-  console.log('*** debug ***');
-  console.log('');
+  console.log(
+    '\n'+'******************************'+
+    '\n'+'***                        ***'+
+    '\n'+'***  log debug informaton  ***'+
+    '\n'+'***                        ***'+
+    '\n'+'***  when it is available  ***'+
+    '\n'+'***                        ***'+
+    '\n'+'******************************'+
+    '\n'
+  );
 }
 if( options['create']){
-  if (fs.existsSync(fileName)) {
-    console.log('');
-    console.log(`Cannot create a new file: ${fileName}`);
-    console.log('That file already exists.')
-    console.log('');
+  try{
+    if (fs.existsSync(fileName)) {
+      console.log('');
+      console.log(`Cannot create a new file: ${fileName}`);
+      console.log('That file already exists.')
+      console.log('');
+      return 1;
+    }
+  }
+  catch(err){
+    console.log(err);
     return 1;
   }
-  if(debug){
-    console.log('*** debug ***');
-    console.log('creating:',fileName);
-    console.log('with this content:');
-    console.log('');
-    console.log(sampleInputFileContent);
-    console.log('');
-    console.log('*** debug ***');
-    console.log('');
-  }
-  fs.writeFileSync(fileName, sampleInputFileContent, function(err2) {
-    if(err) {
+  fs.writeFile(fileName, sampleInputFileContent, function(err2) {
+    if(err2) {
         console.log(err2);
         return 2;
     }
@@ -120,12 +118,6 @@ if( options['create']){
 }
 if( options['input'] ){
   fileName = options['input'];
-  if(debug){
-    console.log('*** debug ***');
-    console.log('using file name from commandline:',options['input']);
-    console.log('*** debug ***');
-    console.log('');
-  }
 }
 if (!fs.existsSync(fileName)) {
   console.log('');
@@ -133,13 +125,6 @@ if (!fs.existsSync(fileName)) {
   console.log('That file does not exist.')
   console.log('');
   return 3;
-}
-if(debug){
-  console.log('*** debug ***');
-  console.log('file used to read data:');
-  console.log(fileName);
-  console.log('*** debug ***');
-  console.log('');
 }
 
 function Node(value,left,right){
@@ -154,38 +139,40 @@ fs.readFile(
   (err,data) => { 
     if(err) {
       throw err;
-    } else {
-
-      if(debug){
-        console.log('*** debug ***');
-        console.log('raw data read from file:');
-        console.log(data);
-        console.log('*** debug ***');
-        console.log('');
+    } 
+    else {
+      function debugLog(...args) {
+        if(debug){
+          console.log(...args);
+        }
       }
+      function debugLogHeader(){
+      }
+      function debugLogFooter(){
+      }
+
+      debugLogHeader();
+      debugLog('raw data read from file:');
+      debugLog(data);
+      debugLogFooter();
 
       // split string based on newline, strip out extra characters
 
       let myData = data.split('\n').map(e=>e.replace('\n','').replace('\r',''));
 
-      if(debug){
-        console.log('*** debug ***');
-        console.log('after parsing the data:');
-        console.log(myData);
-        console.log('*** debug ***');
-        console.log('');
-      }
+      debugLogHeader();
+      debugLog('after parsing the data:');
+      debugLog(myData);
+      debugLogFooter();
+
 
       // grab the target value from the top
 
       let target = parseInt(myData.shift().split(' ').pop());
 
-      if(debug){
-        console.log('*** debug ***');
-        console.log('target product value:', target);
-        console.log('*** debug ***');
-        console.log('');
-      }
+      debugLogHeader();
+      debugLog('target product value:', target);
+      debugLogFooter();
 
       // remove any empty strings
 
@@ -196,13 +183,10 @@ fs.readFile(
       myData = myData.map(e=>e.split(',').map(f=>parseInt(f,10)));
       let depth=myData.length;
 
-      if(debug){
-        console.log('*** debug ***');
-        console.log('after repackaging the data as arrays of ints:');
-        console.log(myData);
-        console.log('*** debug ***');
-        console.log('');
-      }
+      debugLogHeader();
+      debugLog('after repackaging the data as arrays of ints:');
+      debugLog(myData);
+      debugLogFooter();
 
       // data validation, trim the tree
       let myDepth = 1;
@@ -210,31 +194,30 @@ fs.readFile(
       myData.forEach(e=>{
         if( e.length > myDepth){
           if(debug){
-            console.log('original row:',e);
+            debugLog('');
+            debugLog('original row:',e);
           }
-            e.length=myDepth;
+          e.length=myDepth;
           if(debug){
-            console.log(' trimmed row:',e);
+            debugLog(' trimmed row:',e);
+            debugLog('');
           }
           myTreeValid = false;
         }else if(e.length < myDepth){
           if(debug){
-            console.log('short row:',e);
-            console.log(`expected ${myDepth} elements, only had ${e.length}`);
+            debugLog('');
+            debugLog('short row:',e);
+            debugLog(`expected ${myDepth} elements, only had ${e.length}`);
+            debugLog('');
           }
           myTreeValid = false;
         }
         ++myDepth;
       });
-      if(debug){
-        console.log('*** debug ***');
-        console.log('after trimming the data tree:');
-        console.log(myData);
-        console.log('*** debug ***');
-        console.log('');
+      if(debug && !myTreeValid){
+        debugLog('after trimming the data tree:');
+        debugLog(myData);
       }
-      
-
 
       // work from the bottom up of the pyramid
       // initialize the process by popping off the bottom row
@@ -253,17 +236,6 @@ fs.readFile(
           upperNodes.push(node);
         }
         lowerNodes=upperNodes;
-      }
-
-      if(debug){
-        console.log('*** debug ***');
-        console.log('lowerNodes');
-        console.log(lowerNodes);
-        console.log('');
-        console.log('expected lowerNodes length:', 1 );
-        console.log('  actual lowerNodes length:', lowerNodes.length );
-        console.log('*** debug ***');
-        console.log('');
       }
 
       let root = lowerNodes.pop();
@@ -308,32 +280,24 @@ fs.readFile(
       //  on with the code
 
       if(debug){
-        console.log('*** debug ***');
         console.log('tree as evaluated...');
         let arr=[];
         let nextArr=[];
         let dep=depth;
         arr.push(root);
         while(arr.length>0){
-          // let row='';
-          // arr.forEach( e => row += e.value + ' ' );
           --dep;
           console.log( arr.reduce((a,e)=> a+(''+e.value).padStart(4,' '),''.padStart(dep*2,' ')) );
           nextArr=[];
           let first = arr.shift();
           let last = null;
           if( first ){
-            //console.log('first:',first);
             if( first.left ){
-              //console.log('first.left:',first.left);
               nextArr.push(first.left);
-              //console.log('nextArr:',nextArr);
             } 
             if( first.right ){
-              //console.log('first.right:',first.right);
               last = first.right;
               nextArr.push(first.right);
-              //console.log('nextArr:',nextArr);
             } 
           }
           while( arr.length > 0 ){
@@ -342,15 +306,11 @@ fs.readFile(
               // todo: add clever assertion for last === next.left being the same object
               if( next.right ){
                 nextArr.push(next.right);
-                //console.log('nextArr:',nextArr);
               } 
             }
           }
           arr = nextArr;
-          //console.log('nextArr:',nextArr);
-          //console.log('arr:',arr);
         }
-        console.log('*** debug ***');
         console.log('');
       }      
 
@@ -358,25 +318,9 @@ fs.readFile(
 
       let ret = evalNode(root,'',1);
 
-      if(debug){
-        console.log('*** debug ***');
-        console.log('before: filtering...');
-        ret.forEach(el=>{console.log(el)});
-        console.log('*** debug ***');
-        console.log('');
-      }
-
       // filter array to only include paths that add up to target value
 
       ret = ret.filter(e=>e.prod===target);
-
-      if(debug){
-        console.log('*** debug ***');
-        console.log('after: filtering...')
-        ret.forEach(el=>{console.log(el)});
-        console.log('*** debug ***');
-        console.log('');
-      }
 
       if( ret.length < 1 ) {
         console.log(`No paths through the pyramid add up to ${target}.`);
