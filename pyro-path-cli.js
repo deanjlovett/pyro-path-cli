@@ -10,7 +10,7 @@
 // (5) use node to run this file
 //
 //
-// to create a sample input file:
+// to create a sample input file and then run with it:
 // run this command:
 //     node pyro-path.js -c
 //
@@ -112,48 +112,46 @@ if(debug){
 }
 
 let verbose = false;
-if( options['verbose']) {
+if( options['verbose'] ) {
   verbose = true;
 }
 
 let force = false;
-if( options['force']) {
+if( options['force'] ) {
   force = true;
 }
 
-if( options['create']){
+if( options['create'] ){
   try{
     if (fs.existsSync(fileName)) {
       console.log('');
       console.log(`Cannot create a new file: ${fileName}`);
       console.log('That file already exists.')
       console.log('');
-      return 1;
+      console.log('Now using that data file.');
+      console.log('');
+    }
+    else{
+      fs.writeFileSync(fileName, sampleInputFileContent);
+
+      console.log(`Create a new input file: ${fileName}`);
+      console.log('That file has the following content:')
+      console.log('');
+      console.log(sampleInputFileContent);
+      console.log('');
+      console.log('Now using that data file.');
+      console.log('');
     }
   }
   catch(err){
     console.log(err);
     return 2;
   }
-  fs.writeFile(fileName, sampleInputFileContent, function(err2) {
-    if(err2) {
-        console.log(err2);
-        return 3;
-    }
-  }); 
-  console.log(`Create a new input file: ${fileName}`);
-  console.log('That file has the following content:')
-  console.log('');
-  console.log(sampleInputFileContent);
-  console.log('');
-  console.log('Run again without the \'-c\'');
-  console.log('');
-  return 0;
-
 }
-if( options['input'] ){
+else if( options['input'] ){ // ignore --input if they used --create
   fileName = options['input'];
 }
+
 if (!fs.existsSync(fileName)) {
   console.log('');
   console.log(`Cannot open input data file: ${fileName}`);
@@ -214,7 +212,8 @@ debugLog(myData);
 // grab the target value from the top
 
 let targetRow = myData.shift().split(/[\s,:;]+/);
-if( (targetRow[0].toLowerCase() != 'target') || targetRow.length < 2 ){
+
+if( (targetRow[0].toLowerCase() != 'target') || (targetRow.length < 2) ){
   console.log('Target value must be preceeded by the word \'Target\'.');
   console.log('');
   return 5;
@@ -408,11 +407,13 @@ function debugLog(...args) {
 }
 
 /**
- * Yet another node object, this one holds value and ref to child nodes.
+ * Yet another node object.
+ * 
+ * This object holds the LR path, the current product, the numeric path.
  * 
  * @property {string}   path    A string that represents the left-right path.
  * @property {integer}  prod    The multiplcation product of the nodes above this node.
- * @property {string}   ds      String list of values of nodes visited to get the above product.
+ * @property {string}   ds      String of the values of nodes visited to get the above product.
  *
  */
 
@@ -429,12 +430,13 @@ function ProdNode(path,prod,ds){
  * Recursively calls itself on any children. 
  * Creates an array that contains all possible paths and their associated product
  * 
- * @param {Node}      nd         node in the tree.
- * @param {string}    path       Left-Right (LR) path through tree that got us here.
- * @param {integer}   prod       The product of the values we walked to get here.
+ * @param {Node}      nd          node in the tree.
+ * @param {string}    path        Left-Right (LR) path through tree that got us here.
+ * @param {integer}   prod        The product of the values we walked to get here.
+ * @param {string}    ds          String of the values of nodes visited to get the above product.
  *
  * @return {Object}   [ProdNodes] Array of ProdNodes that represents all possible paths 
- *                               from this Node and below.         
+ *                                from this Node and below.         
  */
 
 function evalNode( nd, path, prod, ds ){
