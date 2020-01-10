@@ -63,8 +63,8 @@ const optionDefinitions = [
   { name: 'help',     alias:'h', type: Boolean, defaultOption: false, description: 'Display this usage guide.' },
   { name: 'verbose',  alias:'v', type: Boolean, description: 'Display a bit more information as program runs.' },
   { name: 'debug',    alias:'d', type: Boolean, description: 'Display debug information as program runs.' },
-  { name: 'create',   alias:'c', type: Boolean, description: `Create default data file: ${defaultFileName}` },
   { name: 'force',    alias:'f', type: Boolean, description: 'Attempt to run even if the data is bit wonky.' },
+  { name: 'create',   alias:'c', type: Boolean, description: `Create default data file: ${defaultFileName}` },
 ];
 const options = commandLineArgs(optionDefinitions);
 
@@ -78,7 +78,7 @@ Target: 720
 */
 
 let sampleInputFileContent = 'Target: 720\n2\n4,3\n3,2,6\n2,9,5,2\n10,5,2,15,5';
-let contentNote = `If no input file name is given,\nthen input file: ${defaultFileName}`;
+let contentNote = `If no input file name is given,\nthen use try to us this input file: ${defaultFileName}`;
 const usage = commandLineUsage([
   { header: 'Pyramid Descent Puzzle app',
     content:  'An Initial Programming Puzzle\n\n'+
@@ -199,8 +199,10 @@ function Node(value,left,right){
 
 let data = fs.readFileSync(fileName,'utf-8');
 
-debugLog('raw data read from file:');
+debugLog('Below is raw data read from file:',fileName);
+debugLog('');
 debugLog(data);
+debugLog('');
 
 // split string based on newline, strip out extra characters
 
@@ -210,6 +212,7 @@ debugLog('after parsing the data:');
 debugLog(myData);
 
 // grab the target value from the top
+
 let targetRow = myData.shift().split(/[\s,:;]+/);
 if( (targetRow[0].toLowerCase() != 'target') || targetRow.length < 2 ){
   console.log('Target value must be preceeded by the word \'Target\'.');
@@ -235,7 +238,8 @@ let depth=myData.length;
 debugLog('after repackaging the data as arrays of ints:');
 debugLog(myData);
 
-// data validation, trim the tree
+// data validation: trim the tree
+
 let myDepth = 1;
 let myTreeValid = true;
 let max;
@@ -303,9 +307,9 @@ while( myData.length > 0) {
 
 let root = lowerNodes.pop();
 
-// a pause to explain 
+// a pause in the code to explain what is happening
 //
-// we now have a tree.  Stored in root.
+// we now have a tree.  Hanging off the root node.
 // the nodes are not unique
 //        1
 //       / \
@@ -313,16 +317,18 @@ let root = lowerNodes.pop();
 //     / \ / \
 //    4   5   6
 //
-//  node(2)'s right node is the same as node(3)'s left node.       
-//  but when we walk the tree using the recursive function evalNode()
+//  node(2)'s right node is the same as node(3)'s left node.
+//  both those point to the same node: node(5).
+//  Don't Panic.
+//  When we walk the tree using the recursive function evalNode()
 //  we will end up with 4 unique paths through the tree, even though 
 //  there is node sharing.
 //
 //  the above tree would give
-//  { path: 'LL', prod: ( 1 * 2 * 4 ) },
-//  { path: 'LR', prod: ( 1 * 2 * 5 ) },
-//  { path: 'RL', prod: ( 1 * 3 * 5 ) },
-//  { path: 'RL', prod: ( 1 * 3 * 6 ) },
+//  { path: 'LL', prod: ( 1 -> 2 -> 4 ) },
+//  { path: 'LR', prod: ( 1 -> 2 -> 5 ) },
+//  { path: 'RL', prod: ( 1 -> 3 -> 5 ) },
+//  { path: 'RL', prod: ( 1 -> 3 -> 6 ) },
 //
 //  if you ran this code with the debug output turned on, 
 //  with the following input file:
@@ -340,6 +346,7 @@ let root = lowerNodes.pop();
 //    ProdNode { path: 'RL', prod: 15 }
 //    ProdNode { path: 'RR', prod: 18 }
 //  
+//  the show must go on...
 //  on with the code
 
 // evaluate the node tree, to get a list of paths and values
@@ -355,7 +362,6 @@ debugLog('');
 ret = ret.filter(e=>e.prod===target);
 
 if(debug || verbose){
-
   console.log('');
   console.log('tree as evaluated...');
   prodPath(root,'',depth,allpaths);
@@ -435,13 +441,13 @@ function evalNode( nd, path, prod, ds ){
   let ret =[];
   if( nd ){
     if( nd.left ){
-      ret = evalNode( nd.left,  path+'L', prod * nd.value, ds+(ds.length!==0 ?' ':'')+nd.value );
+      ret = evalNode( nd.left,  path+'L', prod * nd.value, ds+nd.value+' ' );
     }
     if( nd.right ){
-      ret = ret.concat( evalNode( nd.right, path+'R', prod * nd.value, ds+(ds.length!==0 ?' ':'')+nd.value ) );
+      ret = ret.concat( evalNode( nd.right, path+'R', prod * nd.value, ds+nd.value+' ' ) );
     }
     if( !(nd.left) && !(nd.right) ) {
-      ret = [new ProdNode( path, prod * nd.value, ds+' '+nd.value  )];        
+      ret = [new ProdNode( path, prod * nd.value, ds+nd.value)];
     }
   }
   return ret;
