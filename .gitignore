@@ -16,3 +16,6 @@ Thumbs.db
 
 # the usual suspects for 
 node_modules
+
+# other odds and ends
+*scratch*

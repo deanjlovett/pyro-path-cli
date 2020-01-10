@@ -4,31 +4,45 @@
 // (1) install node.js
 // (2) install npm
 // (3) copy this file to that folder
-// (4) run this command:
+// (4) run this command to get the helpers:
 //     npm i command-line-args command-line-usage
 //
+// (5) use node to run this file
+//
+//
+// to create a sample input file:
+// run this command:
+//     node pyro-path.js -c
+//
+//
 // to run and see usage:
-// (1) run this command:
+// run this command:
 //     node pyro-path.js -h
 //
-// *** WARNING ***
 //
-//  If you cannot afford an input file named 'pyramid_sample_input.txt'
-//  one will be provied for you... at runtime 
-//
-// to run:
-// (1) run this command:
+// to run using default input file pyramid_sample_input.txt:
+// run this command:
 //     node pyro-path.js
 //
 //
 // to run with a specific file:
-// (1) run this command:
+// run this command:
 //     node pyro-path.js -i fileName
 //
 //
-// to run with of the developer's debug statements:
-// (1) run this command:
+// to run and display a bit more information:
+// run this command:
+//     node pyro-path.js -v
+//
+//
+// to run and print out the developer's debug statements:
+// run this command:
 //     node pyro-path.js -d
+//
+//
+// to run even if the pyramid data is wonky:
+// run this command:
+//     node pyro-path.js -f
 //
 
 
@@ -36,14 +50,21 @@ const fs = require('fs');
 const commandLineArgs = require('command-line-args');
 const commandLineUsage = require('command-line-usage');
 
+/////////////////////////////////
+//
+// Handle command line arguements
+//
+
 const defaultFileName='pyramid_sample_input.txt'
 let fileName = defaultFileName;
 
 const optionDefinitions = [
-  { name: 'input', alias:'i', type: String, typeLabel: '{underline file}', description: 'The pyramid input file.' },
-  { name: 'help', alias:'h', type: Boolean, defaultOption: false, description: 'Display this usage guide.' },
-  { name: 'debug', alias:'d', type: Boolean, description: 'Display debug information as program runs.' },
-  { name: 'create', alias:'c', type: Boolean, description: `Create default data file: ${defaultFileName}` },
+  { name: 'input',    alias:'i', type: String, defaultOption: true, typeLabel: '{underline file}', description: 'The pyramid input file.' },
+  { name: 'help',     alias:'h', type: Boolean, defaultOption: false, description: 'Display this usage guide.' },
+  { name: 'verbose',  alias:'v', type: Boolean, description: 'Display a bit more information as program runs.' },
+  { name: 'debug',    alias:'d', type: Boolean, description: 'Display debug information as program runs.' },
+  { name: 'create',   alias:'c', type: Boolean, description: `Create default data file: ${defaultFileName}` },
+  { name: 'force',    alias:'f', type: Boolean, description: 'Attempt to run even if the data is bit wonky.' },
 ];
 const options = commandLineArgs(optionDefinitions);
 
@@ -58,13 +79,16 @@ Target: 720
 
 let sampleInputFileContent = 'Target: 720\n2\n4,3\n3,2,6\n2,9,5,2\n10,5,2,15,5';
 let contentNote = `If no input file name is given,\nthen input file: ${defaultFileName}`;
+const usage = commandLineUsage([
+  { header: 'Pyramid Descent Puzzle app',
+    content:  'An Initial Programming Puzzle\n\n'+
+              'Print Left-Right path through pyramid whose product results in target value.' },
+  { header: 'Options', optionList: optionDefinitions },
+  { header: 'Note', content: contentNote },
+  { header: 'Example input file format', content: sampleInputFileContent}
+]);
+
 if( options['help']){
-  const usage = commandLineUsage([
-    { header: 'Pyramid Descent Puzzle app',content: 'An Initial Programming Puzzle' },
-    { header: 'Options', optionList: optionDefinitions },
-    { header: 'Note', content: contentNote },
-    { header: 'Example input file format', content: sampleInputFileContent}
-  ]);
   console.log(usage);
   return 0;
 }
@@ -86,6 +110,17 @@ if(debug){
     '\n'
   );
 }
+
+let verbose = false;
+if( options['verbose']) {
+  verbose = true;
+}
+
+let force = false;
+if( options['force']) {
+  force = true;
+}
+
 if( options['create']){
   try{
     if (fs.existsSync(fileName)) {
@@ -98,12 +133,12 @@ if( options['create']){
   }
   catch(err){
     console.log(err);
-    return 1;
+    return 2;
   }
   fs.writeFile(fileName, sampleInputFileContent, function(err2) {
     if(err2) {
         console.log(err2);
-        return 2;
+        return 3;
     }
   }); 
   console.log(`Create a new input file: ${fileName}`);
@@ -124,227 +159,391 @@ if (!fs.existsSync(fileName)) {
   console.log(`Cannot open input data file: ${fileName}`);
   console.log('That file does not exist.')
   console.log('');
-  return 3;
+  if( fileName == defaultFileName){
+    console.log('Run again with the arg: \'-c\'');
+    console.log(`to create a new sample input file: ${fileName}`);
+    console.log('');  
+    console.log('Run again with the arg: \'-h\' or --help');
+    console.log('for a more complete list of command line options.');
+    console.log('');  
+  }
+  return 4;
 }
+
+//////////////////////////////////
+//
+// Data Structure used in the main
+//
+
+/**
+ * Node to hold value and ref to child nodes.
+ * 
+ * @property {integer}  value     integer value.
+ * @property {Object}   left      ref to left node child.
+ * @property {Object}   rightThe  ref to right node child.
+ *
+ */
 
 function Node(value,left,right){
-  this.value=value;
-  this.left=left;
-  this.right=right;
+  this.value = value;
+  this.left  = left; 
+  this.right = right;
 }
 
-fs.readFile(
-  fileName,
-  'utf-8',
-  (err,data) => { 
-    if(err) {
-      throw err;
-    } 
-    else {
-      function debugLog(...args) {
-        if(debug){
-          console.log(...args);
-        }
-      }
-      function debugLogHeader(){
-      }
-      function debugLogFooter(){
-      }
+///////////////////////////////////////////////////////////////
+//
+// The Main Event
+//
 
-      debugLogHeader();
-      debugLog('raw data read from file:');
-      debugLog(data);
-      debugLogFooter();
+// read in the file
 
-      // split string based on newline, strip out extra characters
+let data = fs.readFileSync(fileName,'utf-8');
 
-      let myData = data.split('\n').map(e=>e.replace('\n','').replace('\r',''));
+debugLog('raw data read from file:');
+debugLog(data);
 
-      debugLogHeader();
-      debugLog('after parsing the data:');
-      debugLog(myData);
-      debugLogFooter();
+// split string based on newline, strip out extra characters
 
+let myData = data.split('\n').map(e=>e.replace('\n','').replace('\r',''));
 
-      // grab the target value from the top
+debugLog('after parsing the data:');
+debugLog(myData);
 
-      let target = parseInt(myData.shift().split(' ').pop());
+// grab the target value from the top
+let targetRow = myData.shift().split(/[\s,:;]+/);
+if( (targetRow[0].toLowerCase() != 'target') || targetRow.length < 2 ){
+  console.log('Target value must be preceeded by the word \'Target\'.');
+  console.log('');
+  return 5;
+}
+let target = parseInt(targetRow[1]);
+if( isNaN(target) ){
+  console.log(`Target value must be an integer. ${targetRow[1]} is not an integer.`);
+  console.log('');
+  return 6;
+}
 
-      debugLogHeader();
-      debugLog('target product value:', target);
-      debugLogFooter();
+// remove any empty strings
 
-      // remove any empty strings
+myData = myData.filter(e=>e.length>0);
 
-      myData = myData.filter(e=>e.length>0);
+// split the string into integers
 
-      // split the string into integers
+myData = myData.map(e=>e.split(/[\s,]+/).map(f=>parseInt(f,10)));
+let depth=myData.length;
 
-      myData = myData.map(e=>e.split(',').map(f=>parseInt(f,10)));
-      let depth=myData.length;
+debugLog('after repackaging the data as arrays of ints:');
+debugLog(myData);
 
-      debugLogHeader();
-      debugLog('after repackaging the data as arrays of ints:');
-      debugLog(myData);
-      debugLogFooter();
-
-      // data validation, trim the tree
-      let myDepth = 1;
-      let myTreeValid = true;
-      myData.forEach(e=>{
-        if( e.length > myDepth){
-          if(debug){
-            debugLog('');
-            debugLog('original row:',e);
-          }
-          e.length=myDepth;
-          if(debug){
-            debugLog(' trimmed row:',e);
-            debugLog('');
-          }
-          myTreeValid = false;
-        }else if(e.length < myDepth){
-          if(debug){
-            debugLog('');
-            debugLog('short row:',e);
-            debugLog(`expected ${myDepth} elements, only had ${e.length}`);
-            debugLog('');
-          }
-          myTreeValid = false;
-        }
-        ++myDepth;
-      });
-      if(debug && !myTreeValid){
-        debugLog('after trimming the data tree:');
-        debugLog(myData);
-      }
-
-      // work from the bottom up of the pyramid
-      // initialize the process by popping off the bottom row
-      // and pre-loading the lowerNode array.
-      let lowerNodes=[];
-      let row = myData.pop();
-      for( let i=0;i<row.length;++i){
-        lowerNodes.push(new Node(row[i],null,null));
-      }
-      // next loop through the array of arrays, from the bottom
-      while( myData.length > 0) {
-        row = myData.pop();
-        let upperNodes=[];
-        for( let j=0;j<row.length;++j){
-          let node = new Node(row[j],lowerNodes[j],lowerNodes[j+1]);
-          upperNodes.push(node);
-        }
-        lowerNodes=upperNodes;
-      }
-
-      let root = lowerNodes.pop();
-
-      // a pause to explain 
-      //
-      // we now have a tree.  Stored in root.
-      // the nodes are not unique
-      //        1
-      //       / \
-      //      2   3
-      //     / \ / \
-      //    4   5   6
-      //
-      //  node(2)'s right node is the same as node(3)'s left node.       
-      //  but when we walk the tree using the recursive function evalNode()
-      //  we will end up with 4 unique paths through the tree, even though 
-      //  there is node sharing.
-      //
-      //  the above tree would give
-      //  { path: 'LL', prod: ( 1 * 2 * 4 ) },
-      //  { path: 'LR', prod: ( 1 * 2 * 5 ) },
-      //  { path: 'RL', prod: ( 1 * 3 * 5 ) },
-      //  { path: 'RL', prod: ( 1 * 3 * 6 ) },
-      //
-      //  if you ran this code with the debug output turned on, 
-      //  with the following input file:
-      // 
-      //  Target: 8
-      //  1
-      //  2,3
-      //  4,5,6
-      // 
-      //  you would see something like this
-      //  in the mix of debug output
-      //    before: filtering...
-      //    RetNode { path: 'LL', prod: 8 }
-      //    RetNode { path: 'LR', prod: 10 }
-      //    RetNode { path: 'RL', prod: 15 }
-      //    RetNode { path: 'RR', prod: 18 }
-      //  
-      //  on with the code
-
-      if(debug){
-        console.log('tree as evaluated...');
-        let arr=[];
-        let nextArr=[];
-        let dep=depth;
-        arr.push(root);
-        while(arr.length>0){
-          --dep;
-          console.log( arr.reduce((a,e)=> a+(''+e.value).padStart(4,' '),''.padStart(dep*2,' ')) );
-          nextArr=[];
-          let first = arr.shift();
-          let last = null;
-          if( first ){
-            if( first.left ){
-              nextArr.push(first.left);
-            } 
-            if( first.right ){
-              last = first.right;
-              nextArr.push(first.right);
-            } 
-          }
-          while( arr.length > 0 ){
-            let next = arr.shift();
-            if( next ){
-              // todo: add clever assertion for last === next.left being the same object
-              if( next.right ){
-                nextArr.push(next.right);
-              } 
-            }
-          }
-          arr = nextArr;
-        }
-        console.log('');
-      }      
-
-      // evaluate the node tree, to get a list of paths and values
-
-      let ret = evalNode(root,'',1);
-
-      // filter array to only include paths that add up to target value
-
-      ret = ret.filter(e=>e.prod===target);
-
-      if( ret.length < 1 ) {
-        console.log(`No paths through the pyramid add up to ${target}.`);
-      }
-      ret.forEach(el=>{console.log(el.path)});
+// data validation, trim the tree
+let myDepth = 1;
+let myTreeValid = true;
+let max;
+myData.forEach(e=>{
+  if( e.length > myDepth){
+    if(debug){
+      debugLog('');
+      debugLog('original row:',e);
     }
+    e.length=myDepth;
+    if(debug){
+      debugLog(' trimmed row:',e);
+      debugLog('');
+    }
+    myTreeValid = false;
+  }else if(e.length < myDepth){
+    if(debug){
+      debugLog('');
+      debugLog('short row:',e);
+      debugLog(`expected ${myDepth} elements, only had ${e.length}`);
+      debugLog('');
+    }
+    myTreeValid = false;
   }
-);
+  ++myDepth;
+});
+if( !myTreeValid ){
+  console.log('');
+  console.log('Data in pyramid is bit wonky.')
+  if( !force ){
+    console.log('Giving up.');
+    console.log('');        
+    return 7;
+  } 
+  console.log('');
+  console.log('Will trundle on since you said to force it.')
+  console.log('No guarantee that all possible paths will be evaluated with wonky data.');
+  console.log('');
+}
 
-function RetNode(path,prod){
+if(debug && !myTreeValid){
+  debugLog('after trimming the data tree:');
+  debugLog(myData);
+  debugLog('');
+}
+
+// work from the bottom up of the pyramid
+// initialize the process by popping off the bottom row
+// and pre-loading the lowerNode array.
+let lowerNodes=[];
+let row = myData.pop();
+for( let i=0;i<row.length;++i){
+  lowerNodes.push(new Node(row[i],null,null));
+}
+// next loop through the array of arrays, from the bottom
+while( myData.length > 0) {
+  row = myData.pop();
+  let upperNodes=[];
+  for( let j=0;j<row.length;++j){
+    let node = new Node(row[j],lowerNodes[j],lowerNodes[j+1]);
+    upperNodes.push(node);
+  }
+  lowerNodes=upperNodes;
+}
+
+let root = lowerNodes.pop();
+
+// a pause to explain 
+//
+// we now have a tree.  Stored in root.
+// the nodes are not unique
+//        1
+//       / \
+//      2   3
+//     / \ / \
+//    4   5   6
+//
+//  node(2)'s right node is the same as node(3)'s left node.       
+//  but when we walk the tree using the recursive function evalNode()
+//  we will end up with 4 unique paths through the tree, even though 
+//  there is node sharing.
+//
+//  the above tree would give
+//  { path: 'LL', prod: ( 1 * 2 * 4 ) },
+//  { path: 'LR', prod: ( 1 * 2 * 5 ) },
+//  { path: 'RL', prod: ( 1 * 3 * 5 ) },
+//  { path: 'RL', prod: ( 1 * 3 * 6 ) },
+//
+//  if you ran this code with the debug output turned on, 
+//  with the following input file:
+// 
+//  Target: 8
+//  1
+//  2,3
+//  4,5,6
+// 
+//  you would see something like this
+//  in the mix of debug output
+//    before: filtering...
+//    ProdNode { path: 'LL', prod: 8 }
+//    ProdNode { path: 'LR', prod: 10 }
+//    ProdNode { path: 'RL', prod: 15 }
+//    ProdNode { path: 'RR', prod: 18 }
+//  
+//  on with the code
+
+// evaluate the node tree, to get a list of paths and values
+
+let ret = evalNode(root,'',1,'');
+
+debugLog('All the paths and their products:');
+ret.forEach(el=>{debugLog(el)});
+debugLog('');
+
+// filter array to only include paths that add up to target value
+
+ret = ret.filter(e=>e.prod===target);
+
+if(debug || verbose){
+
+  console.log('');
+  console.log('tree as evaluated...');
+  prodPath(root,'',depth,allpaths);
+
+  ret.forEach(el=>{
+    if(debug) console.log(el);
+    console.log('path that gives target product of :', target );
+    prodPath(root,el.path,depth,truepath);
+  });
+  console.log('');
+}      
+
+if( ret.length < 1 ) {
+  console.log('No path through the pyramid has a product of :', target);
+  console.log('');
+}
+ret.forEach(el=>{console.log(el.path)});
+return 0;
+
+///////////////////////////////////////////////////////////////
+//
+// End of The Main Event
+//
+
+///////////////////////////////////////////////////////////////
+//
+// Helper Functions and their data structures
+//
+
+
+/**
+ * Prints out args to screen if debug is true
+ * 
+ * @param {...any}  args    almost any number of args
+ *
+ * @return nothing
+ *         
+ */
+
+function debugLog(...args) {
+  if(debug){
+    console.log(...args);
+  }
+}
+
+/**
+ * Yet another node object, this one holds value and ref to child nodes.
+ * 
+ * @property {string}   path    A string that represents the left-right path.
+ * @property {integer}  prod    The multiplcation product of the nodes above this node.
+ * @property {string}   ds      String list of values of nodes visited to get the above product.
+ *
+ */
+
+function ProdNode(path,prod,ds){
   this.path=path;
   this.prod=prod;
+  this.ds=ds;
 }
 
-function evalNode( nd, path, prod ){
+/**
+ * Calculates the path and products for all possible path from the this node and below
+ * 
+ * Walks the tree from this node down.
+ * Recursively calls itself on any children. 
+ * Creates an array that contains all possible paths and their associated product
+ * 
+ * @param {Node}      nd         node in the tree.
+ * @param {string}    path       Left-Right (LR) path through tree that got us here.
+ * @param {integer}   prod       The product of the values we walked to get here.
+ *
+ * @return {Object}   [ProdNodes] Array of ProdNodes that represents all possible paths 
+ *                               from this Node and below.         
+ */
+
+function evalNode( nd, path, prod, ds ){
   let ret =[];
   if( nd ){
-    if( nd.left && nd.right ) {
-      ret = evalNode( nd.left,  path+'L', prod * nd.value ).concat(
-            evalNode( nd.right, path+'R', prod * nd.value ));
-    }else{
-      ret = [new RetNode( path, prod * nd.value )];        
+    if( nd.left ){
+      ret = evalNode( nd.left,  path+'L', prod * nd.value, ds+(ds.length!==0 ?' ':'')+nd.value );
+    }
+    if( nd.right ){
+      ret = ret.concat( evalNode( nd.right, path+'R', prod * nd.value, ds+(ds.length!==0 ?' ':'')+nd.value ) );
+    }
+    if( !(nd.left) && !(nd.right) ) {
+      ret = [new ProdNode( path, prod * nd.value, ds+' '+nd.value  )];        
     }
   }
   return ret;
+}
+
+/**
+ * Print out product pyramid.
+ * 
+ * Walks the tree, starting at root, 
+ * printing value of nodes at the same depth.
+ * Uses depth to try to make the tree display 
+ * as a two sided tree.
+ * 
+ * Example:
+ *            2
+ *          4   3
+ *        3   2   6
+ *      2   9   5   2
+ *   10   5   2  15   5
+ *
+ * 
+ * @param {Node}      root     Root node of tree.
+ * @param {string}    path     Left-Right (LR) path through tree.
+ * @param {integer}   depth    How long is the longest branch of the tree.
+ * @param {function}  spcFunc  Helper function.
+ *                             call with allpaths function to display the whole tree
+ *                             call with truepath function to display the product path only
+ *
+ * @return nothing
+ */
+function prodPath(root,path,depth,spcFunc){
+  console.log('');
+  ipath=path.split('').map( e => ((e === 'R') ? 1 : 0 ) )
+  let offset=0;
+  let arr=[];
+  let nextArr=[];
+  let dep=depth;
+  arr.push(root);
+  while(arr.length>0){
+    --dep;
+    console.log( arr.reduce((a,e,i)=> a+(''+spcFunc(i,offset,e.value)).padStart(6,' '),''.padStart(dep*3,' ')) );
+    offset += ipath.shift();
+    nextArr=[];
+    let first = arr.shift();
+    let last = null;
+    if( first ){
+      if( first.left ){
+        nextArr.push(first.left);
+      } 
+      if( first.right ){
+        last = first.right;
+        nextArr.push(first.right);
+      } 
+    }
+    while( arr.length > 0 ){
+      let next = arr.shift();
+      if( next ){
+        // todo: add clever assertion for last === next.left being the same object
+        if( next.right ){
+          nextArr.push(next.right);
+        } 
+      }
+    }
+    arr = nextArr;
+  }
+  console.log('');
+}
+
+/**
+ * prodPath helper
+ * 
+ * Returns string when offset and index are equal.
+ * Otherwise return a string with spaces of the same length.
+ * 
+ * Used when display the path through the tree that gives the desired target.
+ * 
+ * @param {integer}  index    Root node of tree.
+ * @param {integer}  offset   Left-Right (LR) path through tree.
+ * @param {string}   depth    How long is the longest branch of the tree.
+ *
+ * @return {string}           As described above
+ */
+
+function truepath(index,offset,str){
+  return index===offset ? str : ''.padStart(str.length);
+}
+
+/**
+ * yet another prodPath helper
+ * 
+ * Always just returns string that was passed in.
+ * 
+ * Used when display the whole tree.
+ * 
+ * @param {integer}  index    Root node of tree.
+ * @param {integer}  offset   Left-Right (LR) path through tree.
+ * @param {string}   depth    How long is the longest branch of the tree.
+ *
+ * @return {string}           As described above
+ */
+
+function allpaths(i,o,s){
+  return s;
 }
 
