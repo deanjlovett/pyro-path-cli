@@ -59,12 +59,12 @@ const defaultFileName='pyramid_sample_input.txt'
 let fileName = defaultFileName;
 
 const optionDefinitions = [
-  { name: 'input',    alias:'i', type: String, defaultOption: true, typeLabel: '{underline file}', description: 'The pyramid input file.' },
   { name: 'help',     alias:'h', type: Boolean, defaultOption: false, description: 'Display this usage guide.' },
-  { name: 'verbose',  alias:'v', type: Boolean, description: 'Display a bit more information as program runs.' },
-  { name: 'debug',    alias:'d', type: Boolean, description: 'Display debug information as program runs.' },
+  { name: 'create',   alias:'c', type: Boolean, description: `Create a sample input file: ${defaultFileName}` },
+  { name: 'input',    alias:'i', type: String, defaultOption: true, typeLabel: '{underline file}', description: 'The pyramid data input file.' },
   { name: 'force',    alias:'f', type: Boolean, description: 'Attempt to run even if the data is bit wonky.' },
-  { name: 'create',   alias:'c', type: Boolean, description: `Create default data file: ${defaultFileName}` },
+  { name: 'verbose',  alias:'v', type: Boolean, description: 'Display a bit more information as program runs.' },
+  { name: 'debug',    alias:'d', type: Boolean, description: 'Display debug information as program runs.' },  
 ];
 const options = commandLineArgs(optionDefinitions);
 
@@ -78,7 +78,7 @@ Target: 720
 */
 
 let sampleInputFileContent = 'Target: 720\n2\n4,3\n3,2,6\n2,9,5,2\n10,5,2,15,5';
-let contentNote = `If no input file name is given,\nthen use try to us this input file: ${defaultFileName}`;
+let contentNote = `If no input file name is given,\nthen app will try to open this file: ${defaultFileName}`;
 const usage = commandLineUsage([
   { header: 'Pyramid Descent Puzzle app',
     content:  'An Initial Programming Puzzle\n\n'+
@@ -98,6 +98,21 @@ if( options['debug']) {
   debug = true;
 }
 
+let verbose = false;
+if( options['verbose'] ) {
+  verbose = true;
+}
+
+let force = false;
+if( options['force'] ) {
+  force = true;
+}
+
+let create = false
+if( options['create'] ) {
+  create = true;
+}
+
 if(debug){
   console.log(
     '\n'+'******************************'+
@@ -111,17 +126,7 @@ if(debug){
   );
 }
 
-let verbose = false;
-if( options['verbose'] ) {
-  verbose = true;
-}
-
-let force = false;
-if( options['force'] ) {
-  force = true;
-}
-
-if( options['create'] ){
+if( create ) {
   try{
     if (fs.existsSync(fileName)) {
       console.log('');
@@ -152,22 +157,27 @@ else if( options['input'] ){ // ignore --input if they used --create
   fileName = options['input'];
 }
 
-if (!fs.existsSync(fileName)) {
-  console.log('');
-  console.log(`Cannot open input data file: ${fileName}`);
-  console.log('That file does not exist.')
-  console.log('');
-  if( fileName == defaultFileName){
-    console.log('Run again with the arg: \'-c\'');
-    console.log(`to create a new sample input file: ${fileName}`);
-    console.log('');  
-    console.log('Run again with the arg: \'-h\' or --help');
-    console.log('for a more complete list of command line options.');
-    console.log('');  
+try{
+  if (!fs.existsSync(fileName)) {
+    console.log('');
+    console.log(`Cannot open input data file: ${fileName}`);
+    console.log('That file does not exist.')
+    console.log('');
+    if( fileName == defaultFileName){
+      console.log('Run again with the arg: \'-c\'');
+      console.log(`to create a new sample input file: ${fileName}`);
+      console.log('');  
+      console.log('Run again with the arg: \'-h\' or --help');
+      console.log('for a more complete list of command line options.');
+      console.log('');  
+    }
+    return 3;
   }
+}
+catch(err){
+  console.log(err);
   return 4;
 }
-
 //////////////////////////////////
 //
 // Data Structure used in the main
@@ -554,4 +564,3 @@ function truepath(index,offset,str){
 function allpaths(i,o,s){
   return s;
 }
-
