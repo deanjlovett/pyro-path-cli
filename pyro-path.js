@@ -492,7 +492,7 @@ function evalNode( nd, path, prod, ds ){
  */
 function prodPath(root,path,depth,spcFunc){
   console.log('');
-  ipath=path.split('').map( e => ((e === 'R') ? 1 : 0 ) )
+  ipath=path.split('').map( e => ((e === 'R') ? 1 : 0 ) );  // 0 is left path, 1 is right path.
   let offset=0;
   let arr=[];
   let nextArr=[];
@@ -500,6 +500,12 @@ function prodPath(root,path,depth,spcFunc){
   arr.push(root);
   while(arr.length>0){
     --dep;
+    //
+    // when offset and i are the same value then e (the element) is on the LR path.
+    // when offset and i are NOT the same value that off the path LR path
+    //
+    // we can use that to then print out only the nodes on the LR path
+    //
     console.log( arr.reduce((a,e,i)=> a+(''+spcFunc(i,offset,e.value)).padStart(6,' '),''.padStart(dep*3,' ')) );
     offset += ipath.shift();
     nextArr=[];
@@ -536,9 +542,9 @@ function prodPath(root,path,depth,spcFunc){
  * 
  * Used when display the path through the tree that gives the desired target.
  * 
- * @param {integer}  index    Root node of tree.
- * @param {integer}  offset   Left-Right (LR) path through tree.
- * @param {string}   depth    How long is the longest branch of the tree.
+ * @param {integer}  index    index in the array
+ * @param {integer}  offset   calcuate offset in the array dictated by the LR path
+ * @param {string}   str      String to display
  *
  * @return {string}           As described above
  */
@@ -554,13 +560,13 @@ function truepath(index,offset,str){
  * 
  * Used when display the whole tree.
  * 
- * @param {integer}  index    Root node of tree.
- * @param {integer}  offset   Left-Right (LR) path through tree.
- * @param {string}   depth    How long is the longest branch of the tree.
+ * @param {integer}  index    index in the array
+ * @param {integer}  offset   calcuate offset in the array dictated by the LR path
+ * @param {string}   str      string to display
  *
  * @return {string}           As described above
  */
 
-function allpaths(i,o,s){
+function allpaths(index,offset,str){
   return s;
 }
