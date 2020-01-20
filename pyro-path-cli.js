@@ -206,11 +206,13 @@ function Node(value,left,right){
 // read in the file
 
 let data = fs.readFileSync(fileName,'utf-8');
-
-debugLog('Below is raw data read from file:',fileName);
-debugLog('');
-debugLog(data);
-debugLog('');
+if( debug || verbose ){
+  console.log('');
+  console.log('Below is raw data read from file:',fileName);
+  console.log('');
+  console.log(data);
+  console.log('');
+}
 
 // split string based on newline, strip out extra characters
 
@@ -233,6 +235,11 @@ if( isNaN(target) ){
   console.log(`Target value must be an integer. ${targetRow[1]} is not an integer.`);
   console.log('');
   return 6;
+}
+if( debug || verbose ){
+  console.log('');
+  console.log('Target product value:',target);
+  console.log('');
 }
 
 // remove any empty strings
@@ -568,5 +575,5 @@ function truepath(index,offset,str){
  */
 
 function allpaths(index,offset,str){
-  return s;
+  return str;
 }
