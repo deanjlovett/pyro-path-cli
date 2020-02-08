@@ -10,9 +10,9 @@
 // (5) use node to run this file
 //
 //
-// to create a sample input file and then run with it:
+// to run using default input file pyramid_sample_input.txt:
 // run this command:
-//     node pyro-path.js -c
+//     node pyro-path.js
 //
 //
 // to run and see usage:
@@ -20,14 +20,19 @@
 //     node pyro-path.js -h
 //
 //
-// to run using default input file pyramid_sample_input.txt:
+// to create a sample input file and then run with it:
 // run this command:
-//     node pyro-path.js
+//     node pyro-path.js -c
 //
 //
 // to run with a specific file:
 // run this command:
 //     node pyro-path.js -i fileName
+//
+//
+// to run even if the pyramid data is wonky:
+// run this command:
+//     node pyro-path.js -f
 //
 //
 // to run and display a bit more information:
@@ -39,10 +44,6 @@
 // run this command:
 //     node pyro-path.js -d
 //
-//
-// to run even if the pyramid data is wonky:
-// run this command:
-//     node pyro-path.js -f
 //
 
 
@@ -93,14 +94,9 @@ if( options['help']){
   return 0;
 }
 
-let debug = false;
-if( options['debug']) {
-  debug = true;
-}
-
-let verbose = false;
-if( options['verbose'] ) {
-  verbose = true;
+let create = false
+if( options['create'] ) {
+  create = true;
 }
 
 let force = false;
@@ -108,9 +104,14 @@ if( options['force'] ) {
   force = true;
 }
 
-let create = false
-if( options['create'] ) {
-  create = true;
+let verbose = false;
+if( options['verbose'] ) {
+  verbose = true;
+}
+
+let debug = false;
+if( options['debug']) {
+  debug = true;
 }
 
 if(debug){
@@ -206,13 +207,11 @@ function Node(value,left,right){
 // read in the file
 
 let data = fs.readFileSync(fileName,'utf-8');
-if( debug || verbose ){
-  console.log('');
-  console.log('Below is raw data read from file:',fileName);
-  console.log('');
-  console.log(data);
-  console.log('');
-}
+
+debugLog('Below is raw data read from file:',fileName);
+debugLog('');
+debugLog(data);
+debugLog('');
 
 // split string based on newline, strip out extra characters
 
@@ -235,11 +234,6 @@ if( isNaN(target) ){
   console.log(`Target value must be an integer. ${targetRow[1]} is not an integer.`);
   console.log('');
   return 6;
-}
-if( debug || verbose ){
-  console.log('');
-  console.log('Target product value:',target);
-  console.log('');
 }
 
 // remove any empty strings

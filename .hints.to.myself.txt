@@ -1,0 +1,11 @@
+ 
+ #
+ # git hints
+ #
+ git status
+ git add blah
+ git commit -m 'adds something'
+ git push -u origin master
+
+git status
+git add *; git commit -m 'adds initial files'; git push -u origin master

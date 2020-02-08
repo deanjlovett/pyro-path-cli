@@ -1,4 +1,4 @@
-// Pyramid Descent Puzzle app, CLI version
+// Pyro Triangle Tree Descent Puzzle app, CLI version
 //
 // to build:
 // (1) install node.js
@@ -10,9 +10,9 @@
 // (5) use node to run this file
 //
 //
-// to create a sample input file and then run with it:
+// to run using default input file pyro_sample_input.txt:
 // run this command:
-//     node pyro-path.js -c
+//     node pyro-path.js
 //
 //
 // to run and see usage:
@@ -20,14 +20,19 @@
 //     node pyro-path.js -h
 //
 //
-// to run using default input file pyramid_sample_input.txt:
+// to create a sample input file and then run with it:
 // run this command:
-//     node pyro-path.js
+//     node pyro-path.js -c
 //
 //
 // to run with a specific file:
 // run this command:
 //     node pyro-path.js -i fileName
+//
+//
+// to run even if the triangle data is wonky:
+// run this command:
+//     node pyro-path.js -f
 //
 //
 // to run and display a bit more information:
@@ -40,10 +45,6 @@
 //     node pyro-path.js -d
 //
 //
-// to run even if the pyramid data is wonky:
-// run this command:
-//     node pyro-path.js -f
-//
 
 
 const fs = require('fs');
@@ -55,34 +56,34 @@ const commandLineUsage = require('command-line-usage');
 // Handle command line arguements
 //
 
-const defaultFileName='pyramid_sample_input.txt'
+const defaultFileName='pyro_sample_input.txt'
 let fileName = defaultFileName;
 
 const optionDefinitions = [
   { name: 'help',     alias:'h', type: Boolean, defaultOption: false, description: 'Display this usage guide.' },
   { name: 'create',   alias:'c', type: Boolean, description: `Create a sample input file: ${defaultFileName}` },
-  { name: 'input',    alias:'i', type: String, defaultOption: true, typeLabel: '{underline file}', description: 'The pyramid data input file.' },
+  { name: 'input',    alias:'i', type: String, defaultOption: true, typeLabel: '{underline file}', description: 'The triangle tree data input file.' },
   { name: 'force',    alias:'f', type: Boolean, description: 'Attempt to run even if the data is bit wonky.' },
   { name: 'verbose',  alias:'v', type: Boolean, description: 'Display a bit more information as program runs.' },
   { name: 'debug',    alias:'d', type: Boolean, description: 'Display debug information as program runs.' },  
 ];
 const options = commandLineArgs(optionDefinitions);
 
-/* example of content of pyramid_sample_input.txt
+/* example of content of pyro_sample_input.txt
 Target: 720
-2
-4,3
-3,2,6
-2,9,5,2
-10,5,2,15,5
+ 1
+ 3, 2
+ 2, 1, 5
+ 1, 8, 4, 1
+ 9, 4, 1,14, 4
 */
 
-let sampleInputFileContent = 'Target: 720\n2\n4,3\n3,2,6\n2,9,5,2\n10,5,2,15,5';
+let sampleInputFileContent = 'Target: 720\n1\n3,2\n2,1,5\n1,8,4,1\n9,4,1,14,4';
 let contentNote = `If no input file name is given,\nthen app will try to open this file: ${defaultFileName}`;
 const usage = commandLineUsage([
-  { header: 'Pyramid Descent Puzzle app',
+  { header: 'Pyro Triangle Tree Descent Puzzle app',
     content:  'An Initial Programming Puzzle\n\n'+
-              'Print Left-Right path through pyramid whose product results in target value.' },
+              'Print Left-Right path through triangle tree (binary tree) of numbers whose product results in target value.' },
   { header: 'Options', optionList: optionDefinitions },
   { header: 'Note', content: contentNote },
   { header: 'Example input file format', content: sampleInputFileContent}
@@ -93,14 +94,9 @@ if( options['help']){
   return 0;
 }
 
-let debug = false;
-if( options['debug']) {
-  debug = true;
-}
-
-let verbose = false;
-if( options['verbose'] ) {
-  verbose = true;
+let create = false
+if( options['create'] ) {
+  create = true;
 }
 
 let force = false;
@@ -108,9 +104,14 @@ if( options['force'] ) {
   force = true;
 }
 
-let create = false
-if( options['create'] ) {
-  create = true;
+let verbose = false;
+if( options['verbose'] ) {
+  verbose = true;
+}
+
+let debug = false;
+if( options['debug']) {
+  debug = true;
 }
 
 if(debug){
@@ -206,13 +207,11 @@ function Node(value,left,right){
 // read in the file
 
 let data = fs.readFileSync(fileName,'utf-8');
-if( debug || verbose ){
-  console.log('');
-  console.log('Below is raw data read from file:',fileName);
-  console.log('');
-  console.log(data);
-  console.log('');
-}
+
+debugLog('Below is raw data read from file:',fileName);
+debugLog('');
+debugLog(data);
+debugLog('');
 
 // split string based on newline, strip out extra characters
 
@@ -235,11 +234,6 @@ if( isNaN(target) ){
   console.log(`Target value must be an integer. ${targetRow[1]} is not an integer.`);
   console.log('');
   return 6;
-}
-if( debug || verbose ){
-  console.log('');
-  console.log('Target product value:',target);
-  console.log('');
 }
 
 // remove any empty strings
@@ -284,7 +278,7 @@ myData.forEach(e=>{
 });
 if( !myTreeValid ){
   console.log('');
-  console.log('Data in pyramid is bit wonky.')
+  console.log('Data in triangle tree is bit wonky.')
   if( !force ){
     console.log('Giving up.');
     console.log('');        
@@ -302,7 +296,7 @@ if(debug && !myTreeValid){
   debugLog('');
 }
 
-// work from the bottom up of the pyramid
+// work from the bottom up of the triangle tree
 // initialize the process by popping off the bottom row
 // and pre-loading the lowerNode array.
 let lowerNodes=[];
@@ -391,7 +385,7 @@ if(debug || verbose){
 }      
 
 if( ret.length < 1 ) {
-  console.log('No path through the pyramid has a product of :', target);
+  console.log('No path through the triangle tree has a product of :', target);
   console.log('');
 }
 ret.forEach(el=>{console.log(el.path)});
@@ -473,7 +467,7 @@ function evalNode( nd, path, prod, ds ){
 }
 
 /**
- * Print out product pyramid.
+ * Print out product triangle tree.
  * 
  * Walks the tree, starting at root, 
  * printing value of nodes at the same depth.
@@ -481,11 +475,11 @@ function evalNode( nd, path, prod, ds ){
  * as a two sided tree.
  * 
  * Example:
- *            2
- *          4   3
- *        3   2   6
- *      2   9   5   2
- *   10   5   2  15   5
+ *            1
+ *          3   2
+ *        2   1   5
+ *      1   8   4   1
+ *    9   4   1  14   4
  *
  * 
  * @param {Node}      root     Root node of tree.

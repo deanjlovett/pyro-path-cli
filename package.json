@@ -1,5 +1,5 @@
 {
-  "name": "006-pyro-path",
+  "name": "pyro-path",
   "version": "0.0.1",
   "description": "adding path in pyramid",
   "main": "pyro-path.js",
@@ -13,5 +13,14 @@
     "command-line-usage": "^6.1.0",
     "inquirer": "^7.0.3",
     "n-readlines": "^1.0.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deanjlovett/pyro-path-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/deanjlovett/pyro-path-cli/issues"
+  },
+  "homepage": "https://github.com/deanjlovett/pyro-path-cli#readme"
 }
