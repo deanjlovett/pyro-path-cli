@@ -9,3 +9,7 @@
 
 git status
 git add *; git commit -m 'adds initial files'; git push -u origin master
+
+git add *; git commit -m 'renames and revised and deleted'; git push -u origin master
+
+git add *; git commit -m 'corrected readme'; git push -u origin master

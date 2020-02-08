@@ -1,18 +1,18 @@
 # pyro-path-cli
 
-## Pyro Descending Product Puzzle app, CLI version
+## Descending Triangle Tree Product Puzzle app, CLI version
 
 ```
-Given a product target and a pyramid of numbers...
+Given a product target and a triangle tree of numbers...
 calculate the left-right path that 
-bring you to the bottom of the pyramid
+bring you to the bottom of the triangle tree
 and the desired product of node numbers passed on the way down.
 
 to build:
 run this command:
     npm install
 
-to run using default input file pyramid_sample_input.txt:
+to run using default input file pyro_sample_input.txt:
 run this command:
     node pyro-path.js
 
@@ -32,7 +32,7 @@ run this command:
     node pyro-path.js -i fileName
 
 
-to run even if the pyramid data is wonky:
+to run even if the triangle tree data is wonky:
 run this command:
     node pyro-path.js -f
 
